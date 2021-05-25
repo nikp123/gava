@@ -10,6 +10,10 @@ env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
 
+before_script:
+ - apt-get update --yes
+ - apt-get install --yes libfftw3-dev libasound2-dev libpulse-dev libx11-dev libsdl2-dev libportaudio2 cmake git wayland-protocols
+
 jobs:
   build:
     # The CMake configure and build commands are platform agnostic and should work equally
