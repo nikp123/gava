@@ -158,6 +158,7 @@ void EGLInit(struct XAVA_HANDLE *xava) {
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA);
 
 	// we just need working pointers so that realloc() works
 	vertexData = malloc(1);
@@ -279,8 +280,9 @@ void EGLClear(struct XAVA_HANDLE *xava) {
 
 	// set background clear color
 	uint32_t bgcol = conf->bgcol;
-	glClearColor(ARGB_R_32(bgcol)/255.0, ARGB_G_32(bgcol)/255.0,
-			ARGB_B_32(bgcol)/255.0, conf->background_opacity);
+	float bgcolF = conf->background_opacity/255.0;
+	glClearColor(ARGB_R_32(bgcol)*bgcolF, ARGB_G_32(bgcol)*bgcolF,
+			ARGB_B_32(bgcol)*bgcolF, conf->background_opacity);
 }
 
 void EGLDraw(struct XAVA_HANDLE *xava) {
