@@ -15,10 +15,6 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-# This hack is a of courtesy of: https://stackoverflow.com/a/40947954/3832385
-string(LENGTH "${CMAKE_SOURCE_DIR}/" SOURCE_PATH_SIZE)
-add_definitions("-DSOURCE_PATH_SIZE=${SOURCE_PATH_SIZE}")
-
 # Define XAVA version
 set(xava_VERSION_MAJOR 0)
 set(xava_VERSION_MINOR 7)
@@ -43,7 +39,9 @@ if(MINGW)
 		configure_file("assets/windows/xava.nsi.template" "xava.nsi" NEWLINE_STYLE CRLF)
 	endif()
 else()
-	set(BUILD_FLAGS "${BUILD_FLAGS} -Wl,--export-dynamic")
+	# This hack is a of courtesy of: https://stackoverflow.com/a/40947954/3832385
+	string(LENGTH "${CMAKE_SOURCE_DIR}/" SOURCE_PATH_SIZE)
+	add_definitions("-DSOURCE_PATH_SIZE=${SOURCE_PATH_SIZE}")
 endif()
 
 
