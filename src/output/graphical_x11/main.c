@@ -497,7 +497,7 @@ EXP_FUNC XG_EVENT xavaOutputHandleInput(struct XAVA_HANDLE *hand) {
 						// WARNING: Assumes that alpha is the
 						// upper 8-bits and that rand is 16-bit
 						p->bgcol &= 0xff00000;
-						p->bgcol |= rand()<<16|rand() & 0x00ffffff;
+						p->bgcol |= ((rand()<<16)|rand())&0x00ffffff;
 
 						xbgcol.red   = rand();
 						xbgcol.green = rand();
@@ -510,7 +510,7 @@ EXP_FUNC XG_EVENT xavaOutputHandleInput(struct XAVA_HANDLE *hand) {
 						// WARNING: Assumes that alpha is the
 						// upper 8-bits and that rand is 16-bit
 						p->col &= 0xff00000;
-						p->col |= rand()<<16|rand() & 0x00ffffff;
+						p->col |= ((rand()<<16)|rand())&0x00ffffff;
 
 						xcol.red   = rand();
 						xcol.green = rand();
