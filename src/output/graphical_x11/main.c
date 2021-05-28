@@ -648,6 +648,10 @@ EXP_FUNC void xavaOutputCleanup(struct XAVA_HANDLE *hand) {
 	// make sure that all events are dead by this point
 	XSync(xavaXDisplay, 1);
 
+	#ifdef EGL
+		EGLClean(&ESContext);
+	#endif
+
 	if(gradientBox != 0) { XFreePixmap(xavaXDisplay, gradientBox); gradientBox = 0; };
 
 	#ifdef STARS
