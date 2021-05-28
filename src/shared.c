@@ -231,7 +231,7 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
 					return false;
 				}
 
-				sprintf(configHome, "%s\\%s\\", homedir, PACKAGE);
+				sprintf(configHome, "%s\\%s\\", homeDir, PACKAGE);
 				(*actualPath) = configHome;
 			#else
 				#error "Platform not supported"
