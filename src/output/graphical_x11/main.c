@@ -368,7 +368,9 @@ int render_gradient_x(struct config_params *p) {
 }
 
 EXP_FUNC void xavaOutputClear(struct XAVA_HANDLE *hand) {
-	#if !defined(EGL)
+	#if defined(EGL)
+		EGLClear(hand);
+	#else
 		struct config_params *p = &hand->conf;
 
 		XSetBackground(xavaXDisplay, xavaXGraphics, xbgcol.pixel);
@@ -492,6 +494,11 @@ EXP_FUNC XG_EVENT xavaOutputHandleInput(struct XAVA_HANDLE *hand) {
 					case XK_Escape:
 						return XAVA_QUIT;
 					case XK_b:
+						// WARNING: Assumes that alpha is the
+						// upper 8-bits and that rand is 16-bit
+						p->bgcol &= 0xff00000;
+						p->bgcol |= rand()<<16|rand() & 0x00ffffff;
+
 						xbgcol.red   = rand();
 						xbgcol.green = rand();
 						xbgcol.blue  = rand();
@@ -500,6 +507,11 @@ EXP_FUNC XG_EVENT xavaOutputHandleInput(struct XAVA_HANDLE *hand) {
 						return XAVA_REDRAW;
 					case XK_c:
 						if(p->gradients) break;
+						// WARNING: Assumes that alpha is the
+						// upper 8-bits and that rand is 16-bit
+						p->col &= 0xff00000;
+						p->col |= rand()<<16|rand() & 0x00ffffff;
+
 						xcol.red   = rand();
 						xcol.green = rand();
 						xcol.blue  = rand();
