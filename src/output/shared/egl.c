@@ -101,6 +101,7 @@ EGLint EGLShaderBuild(const char *source, GLenum shader_type) {
 		char log[1000];
 		GLsizei len;
 		glGetShaderInfoLog(shader, 1000, &len, log);
+		fputs(source, stdout);
 		xavaBail("Error: compiling %s: %*s\n",
 				shader_type == GL_VERTEX_SHADER ? "vertex" : "fragment",
 				len, log);
@@ -421,5 +422,12 @@ EGLBoolean EGLCreateContext(struct XAVA_HANDLE *xava, struct _escontext *ESConte
 	ESContext->surface = surface;
 	ESContext->context = context;
 	return EGL_TRUE;
+}
+
+void EGLClean(struct _escontext *ESContext) {
+	free(vertexData);
+	eglDestroyContext(ESContext->display, ESContext->context);
+	eglDestroySurface(ESContext->display, ESContext->surface);
+	eglTerminate(ESContext->display);
 }
 
