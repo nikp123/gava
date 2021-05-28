@@ -18,6 +18,11 @@
 
 struct _escontext ESContext;
 
+// dummy abstraction function
+void waylandEGLShadersLoad(void) {
+	EGLShadersLoad();
+}
+
 void waylandEGLCreateWindow(struct waydata *wd) {
 	//region = wl_compositor_create_region(wd->compositor);
 	//wl_region_add(region, 0, 0, width, height);
@@ -35,11 +40,6 @@ void waylandEGLCreateWindow(struct waydata *wd) {
 	ESContext.native_display = wd->display;
 }
 
-void waylandEGLDestroy(struct waydata *wd) {
-	eglDestroySurface(ESContext.display, ESContext.surface);
-	wl_egl_window_destroy(ESContext.native_window);
-}
-
 void waylandEGLInit(struct waydata *wd) {
 	struct XAVA_HANDLE *xava = wd->hand;
 
@@ -52,13 +52,13 @@ void waylandEGLInit(struct waydata *wd) {
 	EGLInit(xava);
 }
 
-void waylandEGLApply(struct XAVA_HANDLE *xava) {
-	EGLApply(xava);
+void waylandEGLWindowResize(struct waydata *wd, int w, int h) {
+	wl_egl_window_resize(ESContext.native_window, w, h, 0, 0);
+	wl_surface_commit(wd->surface);
 }
 
-// dummy abstraction function
-void waylandEGLShadersLoad(void) {
-	EGLShadersLoad();
+void waylandEGLApply(struct XAVA_HANDLE *xava) {
+	EGLApply(xava);
 }
 
 void waylandEGLDraw(struct XAVA_HANDLE *xava) {
@@ -66,8 +66,8 @@ void waylandEGLDraw(struct XAVA_HANDLE *xava) {
 	eglSwapBuffers(ESContext.display, ESContext.surface); 
 }
 
-void waylandEGLWindowResize(struct waydata *wd, int w, int h) {
-	wl_egl_window_resize(ESContext.native_window, w, h, 0, 0);
-	wl_surface_commit(wd->surface);
+void waylandEGLDestroy(struct waydata *wd) {
+	EGLClean(&ESContext);
+	wl_egl_window_destroy(ESContext.native_window);
 }
 
