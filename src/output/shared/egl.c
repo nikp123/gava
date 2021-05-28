@@ -1,3 +1,5 @@
+#include <GLES2/gl2.h>
+
 #include "../../shared.h"
 #include "egl.h"
 #include "../graphical.h"
@@ -240,14 +242,35 @@ void EGLApply(struct XAVA_HANDLE *xava){
 	glUniform2f(PRE_RESOLUTION, conf->w, conf->h);
 
 	// update projection matrix
-	projectionMatrix[0] = 2.0/xava->conf.w;
-	projectionMatrix[5] = 2.0/xava->conf.h;
+	projectionMatrix[0] = 2.0/conf->w;
+	projectionMatrix[5] = 2.0/conf->h;
 
 	glUniformMatrix4fv(PRE_PROJMATRIX, 1, GL_FALSE, (GLfloat*) projectionMatrix);
 
 	// enable superior color blending (change my mind)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	PRE_GRAD_SECT_COUNT = glGetUniformLocation(pre.program, "gradient_sections");
+	PRE_GRADIENTS  = glGetUniformLocation(pre.program, "gradient_color");
+
+	glUniform1f(PRE_GRAD_SECT_COUNT, conf->gradients ? conf->gradients-1 : 0);
+	glUniform4fv(PRE_GRADIENTS, conf->gradients, gradientColor);
+
+	// "clear" the screen
+	EGLClear(xava);
+}
+
+// The original intention of this was to be called when the screen buffer was "unsafe" or "dirty"
+// This is not needed in EGL since glClear() is called on each frame. HOWEVER, this clear function
+// is often preceded by a slight state change such as a color change, so we pass color info to the
+// shaders HERE and ONLY HERE.
+void EGLClear(struct XAVA_HANDLE *xava) {
+	struct config_params *conf = &xava->conf;
+
+	// if you want to fiddle with certain uniforms from a shader, YOU MUST SWITCH TO IT 
+	// (https://www.khronos.org/opengl/wiki/GLSL_:_common_mistakes#glUniform_doesn.27t_work)
+	glUseProgram(pre.program);
 
 	// set and attach foreground color
 	uint32_t fgcol = conf->col;
@@ -258,12 +281,6 @@ void EGLApply(struct XAVA_HANDLE *xava){
 	uint32_t bgcol = conf->bgcol;
 	glClearColor(ARGB_R_32(bgcol)/255.0, ARGB_G_32(bgcol)/255.0,
 			ARGB_B_32(bgcol)/255.0, conf->background_opacity);
-
-	PRE_GRAD_SECT_COUNT = glGetUniformLocation(pre.program, "gradient_sections");
-	PRE_GRADIENTS  = glGetUniformLocation(pre.program, "gradient_color");
-
-	glUniform1f(PRE_GRAD_SECT_COUNT, conf->gradients ? conf->gradients-1 : 0);
-	glUniform4fv(PRE_GRADIENTS, conf->gradients, gradientColor); 
 }
 
 void EGLDraw(struct XAVA_HANDLE *xava) {
