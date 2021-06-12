@@ -41,9 +41,8 @@ void update_frame(struct waydata *wd) {
 	//struct config_params     *p    = &wd->s->conf;
 
 	// stop updating frames while XAVA's having a nice sleep
-	while(wd->hand->pauseRendering) {
-		sleep(100);
-	}
+	while(wd->hand->pauseRendering) 
+		break;
 
 	// Update frame and inform wayland 
 	struct wl_buffer *buffer = wl_create_framebuffer(wd);
