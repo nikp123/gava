@@ -17,6 +17,9 @@
 # within a reasonable range
 ; autosens = true
 
+# 'overshoot' allows bars to overshoot (in % of display height) without initiating autosens
+; overshoot = 0 
+
 # Manual sensitivity in %. Autosens must be turned off for this to take effect.
 # 200.0 means double height and so on. Accepts only non-negative values.
 ; sensitivity = 100.0

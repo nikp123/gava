@@ -26,8 +26,7 @@ static uint32_t smcount, highcf, lowcf, waves, overshoot, calcbars;
 static fftwf_plan pl, pr;
 fftwf_complex *outl, *outr;
 
-bool senseLow = true;
-static float lastSens;
+bool senseLow;
 
 void separate_freq_bands(fftwf_complex *out, int bars, int channel, double sens, double ignore, int fftsize) {
 	int o,i;
@@ -167,12 +166,6 @@ EXP_FUNC void xavaFilterApply(struct XAVA_HANDLE *hand) {
 		fpeak[i] = .0;
 		k[i] = .0;
 	}
-
-	// so apparently sens can INDEED reach infinity
-	// so I've decided to limit how high sens can rise
-	// to prevent sens from reaching infinity again
-	if(!hand->pauseRendering)
-		lastSens = p->sens;
 
 	// process [smoothing]: calculate gravity
 	g = gravity * ((float)(p->h-1) / 2160) * (60 / (float)p->framerate);
@@ -317,22 +310,23 @@ EXP_FUNC void xavaFilterLoop(struct XAVA_HANDLE *hand) {
 		}
 	}
 
+	senseLow = true;
+
 	// automatic sens adjustment
 	if (p->autosens&&(!hand->pauseRendering)) {
 		// don't adjust on complete silence
 		// as when switching tracks for example
 		for (i=0; i<hand->bars; i++) {
-			if (f[i] > p->h-1) {
+			if (f[i] > (p->h-1)*(100+overshoot)/100 ) {
 				senseLow = false;
 				p->sens *= 0.985;
 				break;
 			}
-			if (senseLow) {
-				p->sens *= 1.01;
-				// impose artificial limit on sens growth
-				if(p->sens > lastSens*2) p->sens = lastSens*2;
-			}
 		}
+		if (senseLow) {
+			p->sens *= 1.001;
+		}
+		printf("%f\n", p->sens);
 	}
 }
 
