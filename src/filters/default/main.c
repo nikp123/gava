@@ -326,7 +326,6 @@ EXP_FUNC void xavaFilterLoop(struct XAVA_HANDLE *hand) {
 		if (senseLow) {
 			p->sens *= 1.001;
 		}
-		printf("%f\n", p->sens);
 	}
 }
 
