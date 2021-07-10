@@ -24,6 +24,11 @@
 	#define DIFF(x,y) (MAX((x),(y))-MIN((x),(y)))
 #endif
 
+#define CALLOC_SELF(x, y) (x)=calloc((y), sizeof(*x))
+#define MALLOC_SELF(x, y)  (x)=malloc(sizeof(*x)*(y))
+#define REALLOC_SELF(x, y) { void (*z)=realloc((x), sizeof(*x)*(y)); \
+	xavaBailCondition(!(z), "Failed to reallocate memory"); (x)=(z); }
+
 #ifdef INIPARSER
 	#include "../lib/iniparser/src/iniparser.h"
 #else

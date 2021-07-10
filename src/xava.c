@@ -239,10 +239,9 @@ as of 0.4.0 all options are specified in config file, see in '/home/username/.co
 
 		audio->inputsize = p->inputsize;
 		audio->fftsize   = p->fftsize;
-		audio->audio_out_l = malloc(sizeof(double)*p->fftsize+1);
-		if(p->stereo) {
-			audio->audio_out_r = malloc(sizeof(double)*p->fftsize+1);
-		}
+		MALLOC_SELF(audio->audio_out_l, p->fftsize+1);
+		if(p->stereo)
+			MALLOC_SELF(audio->audio_out_r, p->fftsize+1);
 		audio->format = -1;
 		audio->terminate = 0;
 		audio->channels = 1+p->stereo;
