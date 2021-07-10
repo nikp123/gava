@@ -2,7 +2,7 @@
 option(FILTER_DEFAULT "FILTER_DEFAULT" ON)
 
 # fftw3
-pkg_check_modules(FFTW3 REQUIRED fftw3)
+pkg_check_modules(FFTW3 REQUIRED fftw3f)
 list(APPEND INCLUDE_DIRS "${FFTW3_INCLUDE_DIRS}")
 list(APPEND LINK_DIRS "${FFTW3_LIBRARY_DIRS}")
 

@@ -18,18 +18,18 @@
 // i wont even bother deciphering this mess
 static float *fc, *fre, *fpeak, *k, g;
 static int *f, *lcf, *hcf, *fmem, *flast, *flastd, *fall, *fl, *fr;
-static double* smooth, gravity, integral, eqBalance, logScale, ignore;
-static double monstercat, *peak, smh;
+static float* smooth, gravity, integral, eqBalance, logScale, ignore;
+static float monstercat, *peak, smh;
 static bool oddoneout;
 static uint32_t smcount, highcf, lowcf, waves, overshoot, calcbars;
 
-static fftw_plan pl, pr;
-fftw_complex *outl, *outr;
+static fftwf_plan pl, pr;
+fftwf_complex *outl, *outr;
 
 bool senseLow = true;
 static float lastSens;
 
-void separate_freq_bands(fftw_complex *out, int bars, int channel, double sens, double ignore, int fftsize) {
+void separate_freq_bands(fftwf_complex *out, int bars, int channel, double sens, double ignore, int fftsize) {
 	int o,i;
 	double y[fftsize / 2 + 1];
 	double temp;
@@ -92,31 +92,31 @@ EXP_FUNC int xavaFilterInit(struct XAVA_HANDLE *hand) {
 	struct config_params *p  = &hand->conf;
 
 	// fft: planning to rock
-	outl = calloc(audio->fftsize/2+1, sizeof(fftw_complex));
-	pl = fftw_plan_dft_r2c_1d(audio->fftsize, audio->audio_out_l, outl, FFTW_MEASURE);
+	CALLOC_SELF(outl, audio->fftsize/2+1); 
+	pl = fftwf_plan_dft_r2c_1d(audio->fftsize, audio->audio_out_l, outl, FFTW_MEASURE);
 
 	if(p->stereo) {
-		outr = calloc(audio->fftsize/2+1, sizeof(fftw_complex));
-		pr = fftw_plan_dft_r2c_1d(audio->fftsize, audio->audio_out_r, outr, FFTW_MEASURE);
+		CALLOC_SELF(outr, audio->fftsize/2+1); 
+		pr = fftwf_plan_dft_r2c_1d(audio->fftsize, audio->audio_out_r, outr, FFTW_MEASURE);
 	}
 
 	xavaBailCondition(highcf > audio->rate / 2,
 			"Higher cutoff cannot be higher than the sample rate / 2");
 
-	fc = malloc(sizeof(float)*hand->bars+1);
-	fre = malloc(sizeof(float)*hand->bars+1);
-	fpeak = malloc(sizeof(float)*hand->bars+1);
-	k = malloc(sizeof(float)*hand->bars+1);
-	f = malloc(sizeof(int)*hand->bars+1);
-	lcf = malloc(sizeof(int)*hand->bars+1);
-	hcf = malloc(sizeof(int)*hand->bars+1);
-	fmem = malloc(sizeof(int)*hand->bars+1);
-	flast = malloc(sizeof(int)*hand->bars+1);
-	flastd = malloc(sizeof(int)*hand->bars+1);
-	fall = malloc(sizeof(int)*hand->bars+1);
-	fl = malloc(sizeof(int)*hand->bars+1);
-	fr = malloc(sizeof(int)*hand->bars+1);
-	peak = malloc(sizeof(double)*(hand->bars+1)+1);
+	MALLOC_SELF(fc, hand->bars);
+	MALLOC_SELF(fre, hand->bars);
+	MALLOC_SELF(fpeak, hand->bars);
+	MALLOC_SELF(k, hand->bars);
+	MALLOC_SELF(f, hand->bars);
+	MALLOC_SELF(lcf, hand->bars);
+	MALLOC_SELF(hcf, hand->bars);
+	MALLOC_SELF(fmem, hand->bars);
+	MALLOC_SELF(flast, hand->bars);
+	MALLOC_SELF(flastd, hand->bars);
+	MALLOC_SELF(fall, hand->bars);
+	MALLOC_SELF(fl, hand->bars);
+	MALLOC_SELF(fr, hand->bars);
+	MALLOC_SELF(peak, hand->bars);
 
 	return 0;
 }
@@ -126,21 +126,20 @@ EXP_FUNC void xavaFilterApply(struct XAVA_HANDLE *hand) {
 	struct config_params *p  = &hand->conf;
 
 	// if fc is not cleared that means that the variables are not initialized
-	void *temp;
-	temp = realloc(fc,sizeof(float)*hand->bars+1);assert(temp);fc=temp;
-	temp = realloc(fre,sizeof(float)*hand->bars+1);assert(temp);fre=temp;
-	temp = realloc(fpeak,sizeof(float)*hand->bars+1);assert(temp);fpeak=temp;
-	temp = realloc(k,sizeof(float)*hand->bars+1);assert(temp);k=temp;
-	temp = realloc(f,sizeof(int)*hand->bars+1);assert(temp);f=temp;
-	temp = realloc(lcf,sizeof(int)*hand->bars+1);assert(temp);lcf=temp;
-	temp = realloc(hcf,sizeof(int)*hand->bars+1);assert(temp);hcf=temp;
-	temp = realloc(fmem,sizeof(int)*hand->bars+1);assert(temp);fmem=temp;
-	temp = realloc(flast,sizeof(int)*hand->bars+1);assert(temp);flast=temp;
-	temp = realloc(flastd,sizeof(int)*hand->bars+1);assert(temp);flastd=temp;
-	temp = realloc(fall,sizeof(int)*hand->bars+1);assert(temp);fall=temp;
-	temp = realloc(fl,sizeof(int)*hand->bars+1);assert(temp);fl=temp;
-	temp = realloc(fr,sizeof(int)*hand->bars+1);assert(temp);fr=temp;
-	temp = realloc(peak,sizeof(double)*(hand->bars+1)+1);assert(temp);peak=temp;
+	REALLOC_SELF(fc,hand->bars);
+	REALLOC_SELF(fre,hand->bars);
+	REALLOC_SELF(fpeak,hand->bars);
+	REALLOC_SELF(k,hand->bars);
+	REALLOC_SELF(f,hand->bars);
+	REALLOC_SELF(lcf,hand->bars);
+	REALLOC_SELF(hcf,hand->bars);
+	REALLOC_SELF(fmem,hand->bars);
+	REALLOC_SELF(flast,hand->bars);
+	REALLOC_SELF(flastd,hand->bars);
+	REALLOC_SELF(fall,hand->bars);
+	REALLOC_SELF(fl,hand->bars);
+	REALLOC_SELF(fr,hand->bars);
+	REALLOC_SELF(peak,hand->bars+1);
 
 	// oddoneout only works if the number of bars is odd, go figure
 	if(oddoneout) {
@@ -238,13 +237,13 @@ EXP_FUNC void xavaFilterLoop(struct XAVA_HANDLE *hand) {
 
 	// process: execute FFT and sort frequency bands
 	if (p->stereo) {
-		fftw_execute(pl);
-		fftw_execute(pr);
+		fftwf_execute(pl);
+		fftwf_execute(pr);
 
 		separate_freq_bands(outl, calcbars, 1, p->sens, ignore, audio->fftsize);
 		separate_freq_bands(outr, calcbars, 2, p->sens, ignore, audio->fftsize);
 	} else {
-		fftw_execute(pl);
+		fftwf_execute(pl);
 		separate_freq_bands(outl, calcbars, 1, p->sens, ignore, audio->fftsize);
 	}
 
@@ -340,9 +339,9 @@ EXP_FUNC void xavaFilterLoop(struct XAVA_HANDLE *hand) {
 EXP_FUNC void xavaFilterCleanup(struct XAVA_HANDLE *hand) {
 	free(outl);
 	free(outr);
-	fftw_destroy_plan(pl);
-	fftw_destroy_plan(pr);
-	fftw_cleanup();
+	fftwf_destroy_plan(pl);
+	fftwf_destroy_plan(pr);
+	fftwf_cleanup();
 
 	free(smooth);
 
@@ -388,7 +387,7 @@ EXP_FUNC void xavaFilterHandleConfiguration(struct XAVA_HANDLE *hand, void *dict
 	// read & validate: eq
 	smcount = iniparser_getsecnkeys(ini, "eq");
 	if (smcount > 0) {
-		smooth = malloc(smcount*sizeof(double));
+		MALLOC_SELF(smooth, smcount);
 		#ifndef LEGACYINIPARSER
 		const char *keys[smcount];
 		iniparser_getseckeys(ini, "eq", keys);
@@ -400,7 +399,7 @@ EXP_FUNC void xavaFilterHandleConfiguration(struct XAVA_HANDLE *hand, void *dict
 		}
 	} else {
 		smcount = 64; //back to the default one
-		smooth = malloc(smcount*sizeof(double));
+		MALLOC_SELF(smooth, smcount);
 		for(int i=0; i<64; i++) smooth[i]=1.0f;
 	}
 

@@ -91,8 +91,8 @@ dictionary *get_config_pointer(void);
 
 // Shared audio data sturct
 struct audio_data {
-	double			*audio_out_r;
-	double			*audio_out_l;
+	float			*audio_out_r;
+	float			*audio_out_l;
 	int				format;
 	unsigned int	rate;
 	char			*source;				// alsa device, fifo path or pulse source
