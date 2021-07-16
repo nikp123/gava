@@ -26,7 +26,7 @@
 #include <pthread.h>
 #include <dirent.h>
 
-#if defined(__linux__)||defined(WIN)
+#if defined(__linux__)||defined(__WIN32__)
 	#include "misc/inode_watcher.h"
 #endif
 
