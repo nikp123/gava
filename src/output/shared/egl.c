@@ -48,7 +48,6 @@ static GLuint POST_TEXCOORD;
 static GLuint POST_TEXTURE;
 static GLuint POST_DEPTH;
 
-
 void EGLShadersLoad() {
 	char *preFragPath, *preVertPath;
 	char *postFragPath, *postVertPath;
@@ -194,27 +193,27 @@ void EGLApply(struct XAVA_HANDLE *xava){
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	// set texture properties
-	//glGenTextures(1,      &FBO.depth_texture);
-	//glBindTexture(GL_TEXTURE_2D, FBO.depth_texture);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, conf->w, conf->h,
-	//		0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glGenTextures(1,      &FBO.depth_texture);
+	glBindTexture(GL_TEXTURE_2D, FBO.depth_texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, conf->w, conf->h,
+			0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	// set framebuffer properties
 	glGenFramebuffers(1,  &FBO.framebuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO.framebuffer);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
 			GL_TEXTURE_2D, FBO.final_texture, 0);
-	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-	//		GL_TEXTURE_2D, FBO.depth_texture, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+			GL_TEXTURE_2D, FBO.depth_texture, 0);
 
 	// check if it borked
 	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	xavaBailCondition(status != GL_FRAMEBUFFER_COMPLETE, 
-			"Framebuffer Objects are not supported! Error code 0x%X\n",
+			"Failed to create framebuffer(s)! Error code 0x%X\n",
 			status);
 
 	glUseProgram(pre.program);
@@ -228,13 +227,13 @@ void EGLApply(struct XAVA_HANDLE *xava){
 		vertexData[i*12]    = xava->rest + i*(conf->bs+conf->bw);
 		vertexData[i*12+1]  = 1.0f;
 		vertexData[i*12+2]  = vertexData[i*12];
-		vertexData[i*12+3]  = 0.0f;
+		vertexData[i*12+3]  = xava->conf.shdw;
 		vertexData[i*12+4]  = vertexData[i*12]+conf->bw;
-		vertexData[i*12+5]  = 0.0;
+		vertexData[i*12+5]  = xava->conf.shdw;
 		vertexData[i*12+6]  = vertexData[i*12+4];
 		vertexData[i*12+7]  = 1.0f;
 		vertexData[i*12+8]  = vertexData[i*12+4];
-		vertexData[i*12+9]  = 0.0;
+		vertexData[i*12+9]  = xava->conf.shdw;
 		vertexData[i*12+10] = vertexData[i*12];
 		vertexData[i*12+11] = 1.0f;
 	}
@@ -250,6 +249,7 @@ void EGLApply(struct XAVA_HANDLE *xava){
 
 	// enable superior color blending (change my mind)
 	glEnable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	PRE_GRAD_SECT_COUNT = glGetUniformLocation(pre.program, "gradient_sections");
@@ -295,9 +295,12 @@ void EGLDraw(struct XAVA_HANDLE *xava) {
 	// i am speed
 	register GLfloat *d = vertexData;
 	for(register int i=0; i<xava->bars; i++) {
-		*(++d) = xava->f[i];
-		*(d+=6) = xava->f[i];
-		*(d+=4) = xava->f[i];
+		// inb4 everyone screams at me how unreadable this is
+		register GLfloat height = xava->f[i] > conf->h-conf->shdw*2 ? \
+			conf->h-conf->shdw*2 : xava->f[i]+conf->shdw;
+		*(++d)  = height;
+		*(d+=6) = height;
+		*(d+=4) = height;
 		d++;
 	}
 
@@ -353,9 +356,9 @@ void EGLDraw(struct XAVA_HANDLE *xava) {
 	glUniform1i(POST_TEXTURE, 0);
 
 	// Depth texture
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_2D, FBO.depth_texture);
-	//glUniform1i(POST_DEPTH, 1);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, FBO.depth_texture);
+	glUniform1i(POST_DEPTH, 1);
 
 	// draw frame
 	GLushort indices[] = { 0, 1, 2, 0, 2, 3 };
