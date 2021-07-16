@@ -47,6 +47,8 @@ static GLuint POST_POS;
 static GLuint POST_TEXCOORD;
 static GLuint POST_TEXTURE;
 static GLuint POST_DEPTH;
+static GLuint POST_SHADOW_COLOR;
+static GLuint POST_SHADOW_OFFSET;
 
 void EGLShadersLoad() {
 	char *preFragPath, *preVertPath;
@@ -149,10 +151,12 @@ void EGLInit(struct XAVA_HANDLE *xava) {
 	PRE_RESOLUTION = glGetUniformLocation(pre.program, "u_resolution");
 	PRE_PROJMATRIX = glGetUniformLocation(pre.program, "projectionMatrix");
 
-	POST_POS       = glGetAttribLocation(post.program, "a_position");
-	POST_TEXCOORD  = glGetAttribLocation(post.program, "a_texCoord");
-	POST_TEXTURE   = glGetUniformLocation(post.program, "s_texture");
-	POST_DEPTH     = glGetUniformLocation(post.program, "s_depth");
+	POST_POS           = glGetAttribLocation(post.program, "a_position");
+	POST_TEXCOORD      = glGetAttribLocation(post.program, "a_texCoord");
+	POST_TEXTURE       = glGetUniformLocation(post.program, "s_texture");
+	POST_DEPTH         = glGetUniformLocation(post.program, "s_depth");
+	POST_SHADOW_COLOR  = glGetUniformLocation(post.program, "shadow_color");
+	POST_SHADOW_OFFSET = glGetUniformLocation(post.program, "shadow_offset");
 	glUseProgram(pre.program);
 
 	glEnable(GL_BLEND);
@@ -283,6 +287,16 @@ void EGLClear(struct XAVA_HANDLE *xava) {
 	float bgcolF = conf->background_opacity/255.0;
 	glClearColor(ARGB_R_32(bgcol)*bgcolF, ARGB_G_32(bgcol)*bgcolF,
 			ARGB_B_32(bgcol)*bgcolF, conf->background_opacity);
+
+	glUseProgram(post.program);
+
+	uint32_t shdw_col = conf->shdw_col;
+	glUniform4f(POST_SHADOW_COLOR, ARGB_R_32(shdw_col), ARGB_G_32(shdw_col),
+			ARGB_B_32(shdw_col), 1.0);
+
+	glUniform2f(POST_SHADOW_OFFSET,
+			((float)conf->shdw)/((float)conf->w)*-0.5,
+			((float)conf->shdw)/((float)conf->h)*0.5);
 }
 
 void EGLDraw(struct XAVA_HANDLE *xava) {
