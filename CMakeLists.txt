@@ -37,6 +37,8 @@ if(MINGW)
 
 		# Prepare NSI file for compilation
 		configure_file("assets/windows/xava.nsi.template" "xava.nsi" NEWLINE_STYLE CRLF)
+	else()
+		set(CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS 1)
 	endif()
 else()
 	# This hack is a of courtesy of: https://stackoverflow.com/a/40947954/3832385
