@@ -6,10 +6,12 @@
 
 #include "../../shared.h"
 
-#define max(a,b) \
-	 ({ __typeof__ (a) _a = (a); \
-			 __typeof__ (b) _b = (b); \
+#ifndef max
+	#define max(a,b) \
+		 ({ __typeof__ (a) _a = (a); \
+		 __typeof__ (b) _b = (b); \
 		 _a > _b ? _a : _b; })
+#endif
 
 // exported function, a macro used to determine which functions
 // are exposed as symbols within the final library/obj files
