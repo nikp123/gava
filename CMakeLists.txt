@@ -151,7 +151,6 @@ add_library(xava-shared SHARED
 add_executable(
 	xava
 	${ADDITIONAL_SOURCES}
-	src/log.c
 	src/module.c
 	src/config.c
 	src/xava.c
