@@ -457,7 +457,7 @@ EXP_FUNC RawData *xavaReadFile(const char *file) {
 		return NULL;
 	}
 
-	fread(data->data, 1, data->size-1, fp);
+	fread(data->data, sizeof(char), data->size, fp);
 
 	// pro-gamer move (NOTE: might not work if char is bigger than 8 bits)
 	((char*)data->data)[data->size] = 0x00;
