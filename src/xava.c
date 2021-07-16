@@ -371,9 +371,13 @@ as of 0.4.0 all options are specified in config file, see in '/home/username/.co
 
 				// zero values causes divided by zero segfault
 				// and set max height
+				int max_height = p->h - p->shdw*2;
 				for (i = 0; i < xava.bars; i++) {
-					if(xava.f[i] < 1) xava.f[i] = 1;
-					if(xava.f[i] > p->h) xava.f[i] = p->h;
+					if(xava.f[i] < 1) 
+						xava.f[i] = 1;
+					else if(xava.f[i] > max_height)
+						xava.f[i] = max_height;
+					xava.f[i] += p->shdw;
 				}
 
 				// output: draw processed input

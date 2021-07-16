@@ -295,12 +295,9 @@ void EGLDraw(struct XAVA_HANDLE *xava) {
 	// i am speed
 	register GLfloat *d = vertexData;
 	for(register int i=0; i<xava->bars; i++) {
-		// inb4 everyone screams at me how unreadable this is
-		register GLfloat height = xava->f[i] > conf->h-conf->shdw*2 ? \
-			conf->h-conf->shdw*2 : xava->f[i]+conf->shdw;
-		*(++d)  = height;
-		*(d+=6) = height;
-		*(d+=4) = height;
+		*(++d)  = xava->f[i];
+		*(d+=6) = xava->f[i];
+		*(d+=4) = xava->f[i];
 		d++;
 	}
 
