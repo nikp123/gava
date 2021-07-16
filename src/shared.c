@@ -16,6 +16,13 @@
 #include <windows.h>
 #endif
 
+// define directory breaks cuz windows sucks
+#ifdef __WIN32__
+	#define DIRBRK '\\'
+#else
+	#define DIRBRK '/'
+#endif
+
 #ifdef __linux__
 	// I've gotten this from a stranger on the internet
 	#include <linux/limits.h>
@@ -50,8 +57,12 @@ EXP_FUNC int xavaMkdir(const char *dir) {
 	strcpy(_path, dir);
 
 	/* Iterate the string */
-	for (p = _path + 1; *p; p++) {
-		if (*p == '/') {
+	int offset = 1;
+	#ifdef __WIN32__
+		offset = 3;
+	#endif
+	for (p = _path + offset; *p; p++) {
+		if (*p == DIRBRK) {
 			/* Temporarily truncate */
 			*p = '\0';
 
@@ -60,7 +71,7 @@ EXP_FUNC int xavaMkdir(const char *dir) {
 					return -1;
 			}
 
-			*p = '/';
+			*p = DIRBRK;
 		}
 	}
 
@@ -226,7 +237,7 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
 
 				// stop using windows 98 ffs
 				if((homeDir = getenv("APPDATA")) == NULL) {
-					xavaError("XAVA could not find %AppData%! Something's REALLY wrong.");
+					xavaError("XAVA could not find \%AppData\%! Something's REALLY wrong.");
 					free(configHome);
 					return false;
 				}
@@ -259,10 +270,13 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
 
 				// bullshit string hacks with nikp123 (ep. 1)
 				for(int i = strlen(path)-1; i > 0; i--) { // go from end of the string
-					if(path[i] == '\\') { // if we've hit a path, change the characters in front
+					if(path[i] == DIRBRK) { // if we've hit a path, change the characters in front
 						path[i+1] = '\0'; // end the string after the path
+						break;
 					}
 				}
+
+				(*actualPath) = path;
 			#else
 				#error "Platform not supported"
 			#endif
@@ -287,18 +301,12 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
 	const char *new_filename = filename;
 	for(int i=0; i<strlen(filename); i++) {
 		// caught a directory
-		if(filename[i] == '/') {
+		if(filename[i] == '/' || filename[i] == '\\') { // Using UNIX-like directories inside codebase, FYI
 			for(int j=last_dir_offset; j<i; j++) {
 				(*actualPath)[path_size+j] = filename[j]; 
 			}
-			#if defined(__APPLE__) || defined(__unix__)
-				(*actualPath)[path_size+i] = '/';
-			#elif defined(__WIN32__)
-				(*actualPath)[path_size+i] = '\\';
-			#else
-				#error "Platform not supported"
-			#endif
 
+			(*actualPath)[path_size+i] = DIRBRK; // use whatever the platforms supports natively
 			(*actualPath)[path_size+i+1] = '\0'; // because C
 
 			last_dir_offset = i+1;
@@ -326,10 +334,9 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
 		case XAVA_FILE_TYPE_CONFIG:
 		{
 			// don't be surprised if you find a lot of bugs here, beware!
-
 			FILE *fp = fopen((*actualPath), "r"), *fn;
 			if (!fp) {
-				xavaWarn("File '%s' does not exist!\nTrying to make a new one...", (*actualPath));
+				xavaWarn("File '%s' does not exist! Trying to make a new one...", (*actualPath));
 
 				// if that particular config file does not exist, try copying the default one
 				char *found;
@@ -349,6 +356,8 @@ EXP_FUNC bool xavaFindAndCheckFile(XF_TYPE type, const char *filename, char **ac
 				// try to save the default file
 				fp = fopen((*actualPath), "w");
 				fn = fopen(found, "r"); // don't bother checking, it'll succeed anyway
+
+				xavaMkdir((*actualPath));
 
 				if(fp==NULL) {
 					xavaError("Failed to save the default config file '%s' to '%s'!",
