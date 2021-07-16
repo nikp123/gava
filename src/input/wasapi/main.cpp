@@ -39,19 +39,23 @@ HRESULT sinkSetFormat(WAVEFORMATEX * pWF) {
 
 HRESULT sinkCopyData(BYTE * pData, UINT32 NumFrames) {
 	float *pBuffer = (float*)pData;
-	for(UINT32 i=0; i<NumFrames; i++) {
-		// convert 32-bit float to something usable
-		switch(audio->channels) {
-			case 1:
+	// convert 32-bit float to something usable
+	switch(audio->channels) {
+		case 1:
+			for(UINT32 i=0; i<NumFrames; i++) {
 				audio->audio_out_l[n] = (*pBuffer++ + *pBuffer++)*16383.5f;
-				break;
-			case 2:
+				n++;
+				if(n == audio->inputsize) n = 0;
+			}
+			break;
+		case 2:
+			for(UINT32 i=0; i<NumFrames; i++) {
 				audio->audio_out_l[n] = (*pBuffer++)*32767.0f;
 				audio->audio_out_r[n] = (*pBuffer++)*32767.0f;
-				break;
-		}
-		n++;
-		if(n == audio->inputsize) n = 0;
+				n++;
+				if(n == audio->inputsize) n = 0;
+			}
+			break;
 	}
 	return S_OK;
 }
