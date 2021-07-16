@@ -8,16 +8,11 @@
 	#define __FILENAME__ __FILE__
 #endif
 
-extern void __internal_xavaSpam (const char *func, char *file, int line, char *fmt, ...);
-extern void __internal_xavaLog  (const char *func, char *file, int line, char *fmt, ...);
-extern void __internal_xavaWarn (const char *func, char *file, int line, char *fmt, ...);
-extern void __internal_xavaError(const char *func, char *file, int line, char *fmt, ...);
+extern void __internal_xavaSpam (const char *func, const char *file, int line, const char *fmt, ...);
+extern void __internal_xavaLog  (const char *func, const char *file, int line, const char *fmt, ...);
+extern void __internal_xavaWarn (const char *func, const char *file, int line, const char *fmt, ...);
+extern void __internal_xavaError(const char *func, const char *file, int line, const char *fmt, ...);
 extern void __internal_xavaDie  (void);
-
-// This is to shut up the code checker
-#ifndef __FILENAME__
-#define __FILENAME__ __FILE__
-#endif
 
 #ifdef DEBUG
 	#define xavaSpam(fmt, ...)  __internal_xavaSpam (__func__, __FILENAME__, __LINE__, fmt, ## __VA_ARGS__);

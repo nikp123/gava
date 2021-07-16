@@ -11,8 +11,8 @@ enum XAVA_MESSAGE_TYPE {
 	XAVA_LOG_ERROR, XAVA_LOG_WARN, XAVA_LOG_NORM, XAVA_LOG_SPAM
 };
 
-static void __internal_xavaMsgHnd(enum XAVA_MESSAGE_TYPE mes, char *fmt,
-		const char *func, char *file, int line, va_list list) {
+static void __internal_xavaMsgHnd(enum XAVA_MESSAGE_TYPE mes, const char *fmt,
+		const char *func, const char *file, int line, va_list list) {
 
 	// please don't let this be a memory bug
 	char *newFmt = malloc((strlen(fmt)+100)*sizeof(char));
@@ -44,28 +44,28 @@ static void __internal_xavaMsgHnd(enum XAVA_MESSAGE_TYPE mes, char *fmt,
 
 // global stuff below
 
-EXP_FUNC void __internal_xavaSpam(const char *func, char *file, int line, char *fmt, ...) {
+EXP_FUNC void __internal_xavaSpam(const char *func, const char *file, int line, const char *fmt, ...) {
 	va_list list;
 	va_start(list, fmt);
 	__internal_xavaMsgHnd(XAVA_LOG_SPAM, fmt, func, file, line, list);
 	va_end(list);
 }
 
-EXP_FUNC void __internal_xavaLog(const char *func, char *file, int line, char *fmt, ...) {
+EXP_FUNC void __internal_xavaLog(const char *func, const char *file, int line, const char *fmt, ...) {
 	va_list list;
 	va_start(list, fmt);
 	__internal_xavaMsgHnd(XAVA_LOG_NORM, fmt, func, file, line, list);
 	va_end(list);
 }
 
-EXP_FUNC void __internal_xavaWarn(const char *func, char *file, int line, char *fmt, ...) {
+EXP_FUNC void __internal_xavaWarn(const char *func, const char *file, int line, const char *fmt, ...) {
 	va_list list;
 	va_start(list, fmt);
 	__internal_xavaMsgHnd(XAVA_LOG_WARN, fmt, func, file, line, list);
 	va_end(list);
 }
 
-EXP_FUNC void __internal_xavaError(const char *func, char *file, int line, char *fmt, ...) {
+EXP_FUNC void __internal_xavaError(const char *func, const char *file, int line, const char *fmt, ...) {
 	va_list list;
 	va_start(list, fmt);
 	__internal_xavaMsgHnd(XAVA_LOG_ERROR, fmt, func, file, line, list);
